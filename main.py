@@ -865,7 +865,7 @@ async def run_bot():
     application.add_handler(MessageHandler(filters.Regex("^🎁 WITHDRAW$"), withdraw))
     application.add_handler(MessageHandler(filters.Regex("^📜 MY VOUCHERS$"), my_vouchers))
     application.add_handler(MessageHandler(filters.Regex("^📦 STOCK$"), stock))
-    application.add_handler(MessageHandler(filters.Regex("^🏆 LEADERBOARD$"), leaderboard))
+    application.add_handler(MessageHandler(filters.Regex("^🏆 LEADERBOARD$"), leaderbooard))
     application.add_handler(MessageHandler(filters.Regex("^👑 ADMIN PANEL$"), admin_panel))
     application.add_handler(MessageHandler(filters.Regex("^📢 BROADCAST$"), broadcast))
     application.add_handler(MessageHandler(filters.Regex("^➕ ADD COUPON$"), add_coupon))
