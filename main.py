@@ -120,11 +120,9 @@ async def show_force_join_message(update, context):
 
     channels = supabase.table("channels").select("channel_link, chat_id").execute()
 
-    text = "<b>🚨 Force Join Required</b>\n\nJoin remaining channels:\n"
     keyboard = []
     row = []
-
-    all_joined = True
+    remaining_channels = []
 
     for ch in channels.data:
         link = ch["channel_link"]
@@ -135,40 +133,45 @@ async def show_force_join_message(update, context):
         try:
             if chat_id:
                 member = await context.bot.get_chat_member(chat_id=chat_id, user_id=user_id)
-                if member.status in ["member", "administrator", "creator"]:
-                    joined = True
             else:
                 username = link.split("/")[-1]
                 member = await context.bot.get_chat_member(chat_id=f"@{username}", user_id=user_id)
-                if member.status in ["member", "administrator", "creator"]:
-                    joined = True
-        except:
+
+            if member.status in ["member", "administrator", "creator"]:
+                joined = True
+
+        except Exception as e:
+            print("Check error:", e)
             joined = False
 
-        if joined:
-            continue
+        # ❗ sirf jo join nahi kiya wo add karo
+        if not joined:
+            remaining_channels.append(link)
 
-        all_joined = False
-
-        row.append(InlineKeyboardButton("🔗 Join", url=link))
-
-        if len(row) == 2:
-            keyboard.append(row)
-            row = []
-
-    if row:
-        keyboard.append(row)
-
-    if all_joined:
+    # 🔥 agar sab joined
+    if not remaining_channels:
         keyboard = [[InlineKeyboardButton("✅ I have joined all", callback_data="joined_all")]]
         text = "<b>✅ All channels joined!</b>\n\nClick below to continue."
+
     else:
+        text = "<b>🚨 Force Join Required</b>\n\nJoin remaining channels:\n"
+
+        for link in remaining_channels:
+            row.append(InlineKeyboardButton("🔗 Join", url=link))
+
+            if len(row) == 2:
+                keyboard.append(row)
+                row = []
+
+        if row:
+            keyboard.append(row)
+
         keyboard.append([InlineKeyboardButton("✅ I have joined all", callback_data="joined_all")])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
-
+    
 async def joined_all_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
