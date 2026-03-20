@@ -110,7 +110,7 @@ async def require_verified(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         referred_by = user.data[0].get("referred_by")
         if referred_by:
             logger.info(f"Verified user {user_id} left channels, deducting point from referrer {referred_by}")
-            await deduct_referral_bonus(referred_by, user_id, context.bot)
+            # await deduct_referral_bonus(referred_by, user_id, context.bot)
         return False
     return True
 
@@ -619,7 +619,7 @@ async def track_channel_membership(update: Update, context: ContextTypes.DEFAULT
                 return
 
             logger.info(f"User {user_id} referred by {referrer_id}, deducting point")
-            await deduct_referral_bonus(referrer_id, user_id, context.bot)
+           # await deduct_referral_bonus(referrer_id, user_id, context.bot)
     except Exception as e:
         logger.error(f"Exception in track_channel_membership: {e}", exc_info=True)
 
