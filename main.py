@@ -1,4 +1,4 @@
-import os
+fromme os
 import logging
 import asyncio
 import random
@@ -115,17 +115,58 @@ async def require_verified(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     return True
 
 # ================= FORCE JOIN HANDLERS =================
-async def show_force_join_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    channels = supabase.table("channels").select("channel_link").execute()
-    text = "<b>🚨 Force Join Required</b>\n\nPlease join the following channels first:\n"
+async def show_force_join_message(update, context):
+    user_id = update.effective_user.id
+
+    channels = supabase.table("channels").select("channel_link, chat_id").execute()
+
+    text = "<b>🚨 Force Join Required</b>\n\nJoin remaining channels:\n"
     keyboard = []
+    row = []
+
+    all_joined = True
+
     for ch in channels.data:
         link = ch["channel_link"]
-        text += f"• {link}\n"
-        keyboard.append([InlineKeyboardButton("🔗 Join Channel", url=link)])
-    text += "\nAfter joining all, click the button below."
-    keyboard.append([InlineKeyboardButton("✅ I have joined all", callback_data="joined_all")])
+        chat_id = ch.get("chat_id")
+
+        joined = False
+
+        try:
+            if chat_id:
+                member = await context.bot.get_chat_member(chat_id=chat_id, user_id=user_id)
+                if member.status in ["member", "administrator", "creator"]:
+                    joined = True
+            else:
+                username = link.split("/")[-1]
+                member = await context.bot.get_chat_member(chat_id=f"@{username}", user_id=user_id)
+                if member.status in ["member", "administrator", "creator"]:
+                    joined = True
+        except:
+            joined = False
+
+        if joined:
+            continue
+
+        all_joined = False
+
+        row.append(InlineKeyboardButton("🔗 Join", url=link))
+
+        if len(row) == 2:
+            keyboard.append(row)
+            row = []
+
+    if row:
+        keyboard.append(row)
+
+    if all_joined:
+        keyboard = [[InlineKeyboardButton("✅ I have joined all", callback_data="joined_all")]]
+        text = "<b>✅ All channels joined!</b>\n\nClick below to continue."
+    else:
+        keyboard.append([InlineKeyboardButton("✅ I have joined all", callback_data="joined_all")])
+
     reply_markup = InlineKeyboardMarkup(keyboard)
+
     await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
 
 async def joined_all_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
