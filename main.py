@@ -244,7 +244,7 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [KeyboardButton("💰 BALANCE"), KeyboardButton("🤝 REFER")],
         [KeyboardButton("🎁 WITHDRAW"), KeyboardButton("📜 MY VOUCHERS")],
-        [KeyboardButton("📦 STOCK"), KeyboardButton("🏆 LEADERBOARD")]
+        [KeyboardButton("📦 STOCK")]
     ]
     if user_id in ADMIN_IDS:
         keyboard.append([KeyboardButton("👑 ADMIN PANEL")])
@@ -345,7 +345,7 @@ async def stock(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"<b>📦 STOCK</b>\n\nSHEIN COUPON - {count}", parse_mode=ParseMode.HTML)
 
 # ================= LEADERBOARD =================
-async def leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def leaderbooard(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await require_verified(update, context):
         return
     user_id = update.effective_user.id
